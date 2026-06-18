@@ -1,0 +1,45 @@
+/*
+ * ============================================================
+ *  MATRIX TEST KEYMAP  --  temporary, for bring-up only
+ * ============================================================
+ *
+ * Every key types a unique character so we can learn exactly which
+ * physical key sits at each (row, column). Flash this to BOTH halves,
+ * open a text editor, and press every key once (a tidy pass: top row
+ * left-to-right, then each row down, then the thumbs). Paste the result
+ * back and the final sweep-pro keymap gets generated with the correct
+ * layout -- no guessing.
+ *
+ * Decode key (what each character means):
+ *
+ *   LEFT half                         RIGHT half
+ *   row0:  1 2 3 4 5                  row0:  6 7 8 9 0
+ *   row1:  Q W E R T                  row1:  Y U I O P
+ *   row2:  A S D F G                  row2:  H J K L ;
+ *   row3:  Z X C V B                  row3:  N M , . /
+ *
+ * So e.g. pressing a key that types "F" = LEFT, row2, column3.
+ * Keys that do nothing are unwired intersections -- that's expected
+ * (only 18 of the 20 positions per half are used: 15 grid + 3 thumbs).
+ *
+ * If NOTHING types on either half, the board is row2col, not col2row:
+ * tell me and I'll flip the shield.
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+
+/ {
+	keymap {
+		compatible = "zmk,keymap";
+
+		default_layer {
+			bindings = <
+			&kp N1  &kp N2  &kp N3  &kp N4  &kp N5      &kp N6  &kp N7  &kp N8     &kp N9   &kp N0
+			&kp Q   &kp W   &kp E   &kp R   &kp T       &kp Y   &kp U   &kp I      &kp O    &kp P
+			&kp A   &kp S   &kp D   &kp F   &kp G       &kp H   &kp J   &kp K      &kp L    &kp SEMI
+			&kp Z   &kp X   &kp C   &kp V   &kp B       &kp N   &kp M   &kp COMMA  &kp DOT  &kp FSLH
+			>;
+		};
+	};
+};

@@ -1,0 +1,11 @@
+file_format: "1"
+id: tbkmini
+name: TBK Mini (wireless, V&Z + SuperMini nRF52840)
+type: shield
+url: https://github.com/jusdisgi/zmk-config-tbkmini
+requires: [pro_micro]
+features:
+  - keys
+siblings:
+  - tbkmini_left
+  - tbkmini_right

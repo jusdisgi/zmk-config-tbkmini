@@ -1,0 +1,13 @@
+# GitHub Actions build matrix.
+# SuperMini nRF52840 builds as nice!nano v2.
+---
+include:
+- board: nice_nano_v2
+  shield: tbkmini_left
+  artifact-name: tbkmini_left
+- board: nice_nano_v2
+  shield: tbkmini_right
+  artifact-name: tbkmini_right
+- board: nice_nano_v2
+  shield: settings_reset
+  artifact-name: settings_reset
