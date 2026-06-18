@@ -7,57 +7,62 @@
 	};
 
 	/*
-	 * Matrix wiring measured from the V&Z adapter on the left half
-	 * (both halves use the same adapter, so pins are identical):
+	 * Matrix wiring -- traced with a multimeter AND confirmed against the
+	 * seller's source (Vzhao-L/zmk-for-charybdis, charybdis-Nano35-MOD).
+	 * Both halves use the same V&Z adapter, so pins are identical.
 	 *
 	 *   Rows:    R1=P0.31  R2=P1.15  R3=P0.24  R4=P0.22
 	 *   Columns: C1=P0.02  C2=P0.29  C3=P0.09  C4=P1.00  C5=P0.11
 	 *
-	 * diode-direction is assumed col2row (matches sweep-pro and most
-	 * hand-wires). If the MATRIX TEST build produces NO output at all,
-	 * the board is row2col -- change the line below to "row2col" and swap
-	 * the row-gpios / col-gpios blocks.
+	 * diode-direction is row2col (confirmed from the seller's config; our
+	 * original col2row guess was wrong). For row2col the rows are driven
+	 * outputs and the columns are pulled-down inputs.
 	 */
-	kscan0: kscan0 {
+	kscan0: kscan {
 		compatible = "zmk,kscan-gpio-matrix";
-		diode-direction = "col2row";
+		diode-direction = "row2col";
 		wakeup-source;
 
 		row-gpios
-			= <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* R1 P0.31 */
-			, <&gpio1 15 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* R2 P1.15 */
-			, <&gpio0 24 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* R3 P0.24 */
-			, <&gpio0 22 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* R4 P0.22 */
+			= <&gpio0 31 GPIO_ACTIVE_HIGH>   /* R1 P0.31 */
+			, <&gpio1 15 GPIO_ACTIVE_HIGH>   /* R2 P1.15 */
+			, <&gpio0 24 GPIO_ACTIVE_HIGH>   /* R3 P0.24 */
+			, <&gpio0 22 GPIO_ACTIVE_HIGH>   /* R4 P0.22 */
 			;
 
 		col-gpios
-			= <&gpio0 2  GPIO_PULL_DOWN>   /* C1 P0.02 */
-			, <&gpio0 29 GPIO_PULL_DOWN>   /* C2 P0.29 */
-			, <&gpio0 9  GPIO_PULL_DOWN>   /* C3 P0.09 */
-			, <&gpio1 0  GPIO_PULL_DOWN>   /* C4 P1.00 */
-			, <&gpio0 11 GPIO_PULL_DOWN>   /* C5 P0.11 */
+			= <&gpio0 2  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* C1 P0.02 */
+			, <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* C2 P0.29 */
+			, <&gpio0 9  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* C3 P0.09 */
+			, <&gpio1 0  (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* C4 P1.00 */
+			, <&gpio0 11 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>   /* C5 P0.11 */
 			;
 	};
 
 	/*
-	 * TEST transform: a full 4 rows x 5 columns grid per half.
-	 * The right half adds col-offset = 5 (see tbkmini_right.overlay), so
-	 * left keys land in columns 0-4 and right keys in columns 5-9.
+	 * 36-key layout: 3x5 + 3 thumbs per hand. Adopted from the seller's
+	 * verified transform. Left half is columns 0-4; the right half adds
+	 * col-offset = 5 (see tbkmini_right.overlay) and is laid out 9..5 so the
+	 * keymap reads left-to-right like a normal board.
 	 *
-	 * This maps EVERY possible (row,col) intersection to a key position so
-	 * the matrix-test keymap can reveal exactly which physical key sits at
-	 * each (row,col). Once we know the layout, this is replaced with a tidy
-	 * 38-key transform.
+	 * Position numbers (keymap binding order):
+	 *    0  1  2  3  4        5  6  7  8  9
+	 *   10 11 12 13 14       15 16 17 18 19
+	 *   20 21 22 23 24       25 26 27 28 29
+	 *         30 31 32       33 34 35
+	 *
+	 * Thumbs:  left  30=outer 31=mid 32=inner
+	 *          right 33=inner 34=mid 35=outer
 	 */
 	default_transform: keymap_transform_0 {
 		compatible = "zmk,matrix-transform";
 		columns = <10>;
 		rows = <4>;
 		map = <
-		RC(0,0) RC(0,1) RC(0,2) RC(0,3) RC(0,4)   RC(0,5) RC(0,6) RC(0,7) RC(0,8) RC(0,9)
-		RC(1,0) RC(1,1) RC(1,2) RC(1,3) RC(1,4)   RC(1,5) RC(1,6) RC(1,7) RC(1,8) RC(1,9)
-		RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4)   RC(2,5) RC(2,6) RC(2,7) RC(2,8) RC(2,9)
-		RC(3,0) RC(3,1) RC(3,2) RC(3,3) RC(3,4)   RC(3,5) RC(3,6) RC(3,7) RC(3,8) RC(3,9)
+		RC(0,0) RC(0,1) RC(0,2) RC(0,3) RC(0,4)   RC(0,9) RC(0,8) RC(0,7) RC(0,6) RC(0,5)
+		RC(1,0) RC(1,1) RC(1,2) RC(1,3) RC(1,4)   RC(1,9) RC(1,8) RC(1,7) RC(1,6) RC(1,5)
+		RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4)   RC(2,9) RC(2,8) RC(2,7) RC(2,6) RC(2,5)
+		                RC(3,2) RC(3,3) RC(3,4)   RC(3,9) RC(3,8) RC(3,7)
 		>;
 	};
 };

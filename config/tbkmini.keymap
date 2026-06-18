@@ -1,44 +1,169 @@
-/*
- * ============================================================
- *  MATRIX TEST KEYMAP  --  temporary, for bring-up only
- * ============================================================
- *
- * Every key types a unique character so we can learn exactly which
- * physical key sits at each (row, column). Flash this to BOTH halves,
- * open a text editor, and press every key once (a tidy pass: top row
- * left-to-right, then each row down, then the thumbs). Paste the result
- * back and the final sweep-pro keymap gets generated with the correct
- * layout -- no guessing.
- *
- * Decode key (what each character means):
- *
- *   LEFT half                         RIGHT half
- *   row0:  1 2 3 4 5                  row0:  6 7 8 9 0
- *   row1:  Q W E R T                  row1:  Y U I O P
- *   row2:  A S D F G                  row2:  H J K L ;
- *   row3:  Z X C V B                  row3:  N M , . /
- *
- * So e.g. pressing a key that types "F" = LEFT, row2, column3.
- * Keys that do nothing are unwired intersections -- that's expected
- * (only 18 of the 20 positions per half are used: 15 grid + 3 thumbs).
- *
- * If NOTHING types on either half, the board is row2col, not col2row:
- * tell me and I'll flip the shield.
- */
+// Adapted from zmk-config-sweep-pro for the 36-key wireless TBK Mini.
+// Trackpad / encoder / pointer / OLED / report behaviors removed; thumb row
+// reworked for 3 thumbs per hand with the innermost as LSHFT / RSHFT.
 
 #include <behaviors.dtsi>
+#include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/outputs.h>
+
+#define ABC 0
+#define NUM 1
+#define SYM 2
+#define NAV 3
+#define FUN 4
+#define UTIL 5
+
+// Home row mods
+#define HRML(k1,k2,k3,k4) &ht LGUI k1  &ht LALT k2  &ht LCTRL k3  &ht LSHFT k4
+#define HRMR(k1,k2,k3,k4) &ht RSHFT k1  &ht RCTRL k2  &ht RALT k3  &ht RGUI k4
 
 / {
+	behaviors {
+		ht: hold_tap {
+			label = "hold_tap";
+			compatible = "zmk,behavior-hold-tap";
+			#binding-cells = <2>;
+			flavor = "tap-preferred";
+			tapping-term-ms = <180>;
+			quick-tap-ms = <100>;
+			require-prior-idle-ms = <100>;
+			bindings = <&kp>, <&kp>;
+		};
+		btht: bluetooth_hold_tap {
+			compatible = "zmk,behavior-hold-tap";
+			#binding-cells = <2>;
+			flavor = "tap-preferred";
+			tapping-term-ms = <2000>;
+			require-prior-idle-ms = <100>;
+			bindings = <&btdis>, <&btsel>;
+		};
+		tdto0: tap_dance_to_layer_0 {
+			compatible = "zmk,behavior-tap-dance";
+			#binding-cells = <0>;
+			tapping-term-ms = <200>;
+			bindings = <&none>, <&to 0>;
+		};
+	};
+
+	macros {
+		btsel: bluetooth_select {
+			compatible = "zmk,behavior-macro-one-param";
+			#binding-cells = <1>;
+			bindings
+				= <&macro_param_1to2>
+				, <&macro_tap &bt BT_SEL MACRO_PLACEHOLDER>
+				, <&macro_tap &out OUT_BLE>
+				;
+		};
+		btdis: bluetooth_disconnect {
+			compatible = "zmk,behavior-macro-one-param";
+			#binding-cells = <1>;
+			bindings
+				= <&macro_param_1to2>
+				, <&macro_tap &bt BT_DISC MACRO_PLACEHOLDER>
+				;
+		};
+	};
+
+	conditional_layers {
+		compatible = "zmk,conditional-layers";
+		tri_layer {
+			if-layers = <NAV FUN>;
+			then-layer = <UTIL>;
+		};
+	};
+
+	combos {
+		compatible = "zmk,combos";
+
+		combo_caps_word {
+			timeout-ms = <30>;
+			key-positions = <2 3>;
+			bindings = <&caps_word>;
+		};
+		combo_del {
+			timeout-ms = <30>;
+			key-positions = <6 7>;
+			bindings = <&kp DEL>;
+		};
+		combo_esc {
+			timeout-ms = <30>;
+			key-positions = <0 1>;
+			bindings = <&kp ESC>;
+		};
+		combo_navlock {
+			timeout-ms = <30>;
+			key-positions = <26 28>;
+			bindings = <&to NAV>;
+		};
+	};
+
 	keymap {
 		compatible = "zmk,keymap";
 
 		default_layer {
+			display-name = "ABC";
 			bindings = <
-			&kp N1  &kp N2  &kp N3  &kp N4  &kp N5      &kp N6  &kp N7  &kp N8     &kp N9   &kp N0
-			&kp Q   &kp W   &kp E   &kp R   &kp T       &kp Y   &kp U   &kp I      &kp O    &kp P
-			&kp A   &kp S   &kp D   &kp F   &kp G       &kp H   &kp J   &kp K      &kp L    &kp SEMI
-			&kp Z   &kp X   &kp C   &kp V   &kp B       &kp N   &kp M   &kp COMMA  &kp DOT  &kp FSLH
+		//╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
+			&kp Q      &kp W      &kp F      &lt NAV P  &kp B          &kp J      &kp L      &kp U      &kp Y      &kp SQT
+		//├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
+			HRML(A,        R,         S,         T)     &kp G          &kp M      HRMR(N,        E,         I,        O)
+		//├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
+			&lt FUN Z  &kp X      &lt SYM C  &lt NUM D  &kp V          &kp K      &kp H      &kp COMMA  &kp DOT    &kp FSLH
+		//╰──────────┴──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┴──────────╯
+			                      &kp LSHFT  &kp TAB    &kp ENTER      &kp SPACE  &kp BSPC   &kp RSHFT
+		//                      ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
+			>;
+		};
+
+		num_layer {
+			display-name = "NUM";
+			bindings = <
+			&kp N1     &kp N2     &kp N3     &kp N4     &kp N5         &kp N6     &kp N7     &kp N8     &kp N9     &kp N0
+			&kp DEL    &kp LGUI   &caps_word &none      &none          &kp FSLH   &kp N4     &kp N5     &kp N6     &kp MINUS
+			&kp LALT   &kp LCTRL  &kp LSHFT  &none      &none          &kp ASTRK  &kp N1     &kp N2     &kp N3     &kp PLUS
+			                      &trans     &kp ESC    &kp EQUAL      &kp N0     &kp DOT    &trans
+			>;
+		};
+
+		sym_layer {
+			display-name = "SYM";
+			bindings = <
+			&none      &none      &none      &none      &none          &kp CARET  &kp MINUS  &kp EQUAL  &kp BSLH   &kp TILDE
+			&none      &none      &none      &none      &none          &kp COLON  &kp LPAR   &kp RPAR   &kp PLUS   &kp SEMI
+			&none      &none      &none      &none      &none          &kp PIPE   &kp EXCL   &kp AT     &kp HASH   &kp GRAVE
+			                      &trans     &kp LBKT   &kp RBKT       &kp LBRC   &kp RBRC   &trans
+			>;
+		};
+
+		nav_layer {
+			display-name = "NAV";
+			bindings = <
+			&none      &none      &kp LSHFT  &none      &none          &kp PG_UP  &kp HOME   &kp UP     &kp END    &kp PG_UP
+			&none      &none      &none      &none      &none          &kp PG_DN  &kp LEFT   &kp DOWN   &kp RIGHT  &kp PG_DN
+			&mo UTIL   &none      &none      &none      &kp SPACE      &kp RALT   &kp HOME   &kp INS    &kp END    &tdto0
+			                      &trans     &kp LEFT   &kp RIGHT      &kp RSHFT  &kp RCTRL  &trans
+			>;
+		};
+
+		fun_layer {
+			display-name = "FUN";
+			bindings = <
+			&kp F1     &kp F2     &kp F3     &lt NAV F4 &kp F5         &kp C_PP     &kp F9   &kp F10    &kp F11    &kp F12
+			&kp LGUI   &kp LALT   &kp LCTRL  &kp LSHFT  &none          &kp C_VOL_UP &kp F5   &kp F6     &kp F7     &kp F8
+			&none      &kp LC(Z)  &kp LC(X)  &kp LC(C)  &kp LC(V)      &kp C_VOL_DN &kp F1   &kp F2     &kp F3     &kp F4
+			                      &trans     &none      &kp ESC        &kp C_MUTE &kp PSCRN  &trans
+			>;
+		};
+
+		util_layer {
+			display-name = "UTIL";
+			bindings = <
+			&none      &none      &none      &none      &none          &none      &btht 4 4  &none      &none      &none
+			&none      &none      &none      &none      &none          &none      &btht 0 0  &btht 1 1  &btht 2 2  &btht 3 3
+			&none      &none      &none      &none      &none          &none      &out OUT_TOG &none    &none      &bt BT_CLR
+			                      &trans     &none      &none          &bt BT_PRV &bt BT_NXT &trans
 			>;
 		};
 	};
