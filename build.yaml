@@ -1,13 +1,15 @@
 # GitHub Actions build matrix.
-# SuperMini nRF52840 builds as nice!nano v2.
+# SuperMini nRF52840 builds as nice!nano v2, which in post-migration ZMK uses
+# the Zephyr hardware-model-v2 name `nice_nano//zmk` (there is NO `nice_nano_v2`
+# board target anymore).
 ---
 include:
-- board: nice_nano_v2
+- board: nice_nano//zmk
   shield: tbkmini_left
   artifact-name: tbkmini_left
-- board: nice_nano_v2
+- board: nice_nano//zmk
   shield: tbkmini_right
   artifact-name: tbkmini_right
-- board: nice_nano_v2
+- board: nice_nano//zmk
   shield: settings_reset
   artifact-name: settings_reset
